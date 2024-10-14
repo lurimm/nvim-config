@@ -1,0 +1,18 @@
+{
+  "Print an object console": {
+    "scope": "javascript,typescript",
+    "prefix": "logobj",
+    "body": [
+      "console.log({ $1 });"
+    ],
+    "description": "Log output to console"
+  },
+    "Print a flag to debug": {
+    "scope": "javascript,typescript",
+    "prefix": "logflag",
+    "body": [
+      "console.log('>>> HITTING THIS');"
+    ],
+    "description": "Log output to console"
+  }
+}
