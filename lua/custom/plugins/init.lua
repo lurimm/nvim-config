@@ -4,6 +4,25 @@
 -- See the kickstart.nvim README for more information
 return {
 
+  { -- You can easily change to a different colorscheme.
+    -- Change the name of the colorscheme plugin below, and then
+    -- change the command in the config to whatever the name of that colorscheme is.
+    --
+    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000, -- Make sure to load this before all the other start plugins.
+    init = function()
+      -- Load the colorscheme here.
+      -- Like many other themes, this one has different styles, and you could load
+      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+      vim.cmd.colorscheme 'catppuccin-macchiato'
+
+      -- You can configure highlights by doing something like:
+      vim.cmd.hi 'Comment gui=none'
+    end,
+  },
+
   {
     'kdheepak/lazygit.nvim',
     cmd = {
@@ -91,17 +110,31 @@ return {
     config = function()
       require('lualine').setup {
         options = {
+          theme = 'catppuccin',
           icons_enabled = true,
           component_separators = '|',
           section_separators = '',
         },
         sections = {
+          lualine_a = {
+            {
+              'mode',
+              separator = { right = '' }, -- Rounded edges around the mode section
+            },
+          },
           lualine_b = {
             {
               'buffers',
               symbols = {
                 modified = ' ●', -- Dot symbol to indicate unsaved changes
               },
+            },
+          },
+          lualine_c = { '' },
+          lualine_z = {
+            {
+              'location',
+              separator = { left = '' }, -- Rounded edges around location section
             },
           },
         },
