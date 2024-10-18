@@ -3,6 +3,23 @@
 --
 -- See the kickstart.nvim README for more information
 return {
+  {
+    'utilyre/barbecue.nvim',
+    name = 'barbecue',
+    version = '*',
+    dependencies = {
+      'SmiteshP/nvim-navic',
+      'nvim-tree/nvim-web-devicons', -- optional dependency
+    },
+    opts = {
+      -- configurations go here
+    },
+    config = function()
+      require('barbecue').setup {
+        theme = 'catppuccin', -- catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+      }
+    end,
+  },
 
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
@@ -20,6 +37,17 @@ return {
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
+    end,
+    config = function()
+      require('catppuccin').setup {
+        integrations = {
+          barbecue = { dim_dirname = true, bold_basename = true, dim_context = false, alt_background = false },
+        },
+      }
+
+      vim.api.nvim_set_hl(0, 'NavicIconsOperator', { default = true, bg = 'none', fg = '#eedaad' })
+      vim.api.nvim_set_hl(0, 'NavicText', { default = true, bg = 'none', fg = '#eedaad' })
+      vim.api.nvim_set_hl(0, 'NavicSeparator', { default = true, bg = 'none', fg = '#eedaad' })
     end,
   },
 
@@ -88,9 +116,10 @@ return {
       { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
     },
     opts = {
+      popup_border_style = 'single',
       filesystem = {
         window = {
-          position = 'right',
+          position = 'float',
           width = 30,
           mappings = {
             ['\\'] = 'close_window',
@@ -104,44 +133,49 @@ return {
     },
   },
 
+
   {
     'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-      require('lualine').setup {
-        options = {
-          theme = 'catppuccin',
-          icons_enabled = true,
-          component_separators = '|',
-          section_separators = '',
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+      'meuter/lualine-so-fancy.nvim',
+    },
+    opts = {
+      options = {
+        theme = 'catppuccin',
+        component_separators = { left = '│', right = '│' },
+        section_separators = { left = '', right = '' },
+        globalstatus = true,
+        refresh = {
+          statusline = 100,
         },
-        sections = {
-          lualine_a = {
-            {
-              'mode',
-              separator = { right = '' }, -- Rounded edges around the mode section
-            },
-          },
-          lualine_b = {
-            {
-              'buffers',
-              symbols = {
-                modified = ' ●', -- Dot symbol to indicate unsaved changes
-              },
-            },
-          },
-          lualine_c = { '' },
-          lualine_z = {
-            {
-              'location',
-              separator = { left = '' }, -- Rounded edges around location section
-            },
-          },
+      },
+      sections = {
+        lualine_a = {
+          { 'fancy_mode', width = 3 },
         },
-      }
-    end,
+        lualine_b = {
+          { 'fancy_branch' },
+          { 'fancy_diff' },
+        },
+        lualine_c = {
+          { 'fancy_cwd', substitute_home = true },
+        },
+        lualine_x = {
+          { 'fancy_macro' },
+          { 'fancy_diagnostics' },
+          { 'fancy_searchcount' },
+          { 'fancy_location' },
+        },
+        lualine_y = {
+          { 'fancy_filetype', ts_icon = '' },
+        },
+        lualine_z = {
+          { 'fancy_lsp_servers' },
+        },
+      },
+    },
   },
-
   {
     'joukevandermaas/vim-ember-hbs',
     dependencies = { 'pangloss/vim-javascript', 'Quramy/vim-js-pretty-template' },
@@ -152,5 +186,23 @@ return {
     config = function()
       require('nvim-ts-autotag').setup()
     end,
+  },
+
+  {
+    'f-person/git-blame.nvim',
+    -- load the plugin at startup
+    event = 'VeryLazy',
+    -- Because of the keys part, you will be lazy loading this plugin.
+    -- The plugin wil only load once one of the keys is used.
+    -- If you want to load the plugin at startup, add something like event = "VeryLazy",
+    -- or lazy = false. One of both options will work.
+    opts = {
+      -- your configuration comes here
+      -- for example
+      enabled = true, -- if you want to enable the plugin
+      message_template = ' <summary> • <date> • <author> • <<sha>>', -- template for the blame message, check the Message template section for more options
+      date_format = '%m-%d-%Y %H:%M:%S', -- template for the date, check Date format section for more options
+      virtual_text_column = 1, -- virtual text start column, check Start virtual text at column section for more options
+    },
   },
 }
