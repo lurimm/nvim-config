@@ -92,6 +92,7 @@ vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
+vim.o.cmdheight = 0
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -358,7 +359,8 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
-      { 'nvim-telescope/telescope-ui-select.nvim' },
+      'nvim-telescope/telescope-ui-select.nvim',
+      'nvim-telescope/telescope-file-browser.nvim',
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -395,12 +397,27 @@ require('lazy').setup({
         --   },
         -- },
         -- pickers = {}
+        defaults = {
+          theme = 'dropdown',
+          sorting_strategy = 'ascending',
+          layout_config = {
+            horizontal = {
+              prompt_position = 'top',
+              preview_width = 0.5,
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
-          file_preview = {
+          file_browser = {
             display_stat = false,
+          },
+        },
+        pickers = {
+          find_files = {
+            theme = 'dropdown',
           },
         },
       }
@@ -408,6 +425,7 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
+      pcall(require('telescope').load_extension, 'file_browser')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -422,6 +440,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<space>fb', ':Telescope file_browser path=%:p:h select_buffer=true<CR>')
+      vim.keymap.set('n', '<space>cs', ':Telescope colorscheme<CR>')
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -445,8 +464,6 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
-
-      require('telescope').load_extension 'file_browser'
     end,
   },
 
@@ -629,13 +646,27 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {},
-        ember = {},
+        ts_ls = {
+          setup = {
+            capabilities = capabilities,
+          },
+        },
+        ember = {
+          setup = {
+            capabilities = capabilities,
+          },
+        },
         html = {
           setup = {
             capabilities = capabilities,
           },
         },
+        cssls = {
+          setup = {
+            capabilities = capabilities,
+          },
+        },
+
         jsonls = {
           setup = {
             capabilities = capabilities,
@@ -727,8 +758,11 @@ require('lazy').setup({
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        javascript = { 'prettierd', 'prettier', stop_after_first = true },
-        fixjson = { 'prettierd', 'prettier', stop_after_first = true },
+        javascript = { 'prettier' },
+        css = { 'prettier' },
+        fixjson = { 'prettier' },
+        handlebars = { 'prettier' },
+        djlint = { 'prettier' },
       },
     },
   },
@@ -756,10 +790,14 @@ require('lazy').setup({
           {
             'rafamadriz/friendly-snippets',
             config = function()
-              require('luasnip.loaders.from_vscode').lazy_load { paths = '~/.config/nvim/snippets' }
+              require('luasnip.loaders.from_vscode').lazy_load()
             end,
           },
         },
+        config = function()
+          -- Load your custom snippets
+          require('luasnip.loaders.from_vscode').lazy_load { paths = '~/.config/nvim/snippets' }
+        end,
       },
       'saadparwaiz1/cmp_luasnip',
 

@@ -16,38 +16,32 @@ return {
     },
     config = function()
       require('barbecue').setup {
-        theme = 'catppuccin', -- catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+        theme = 'nord', -- catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
       }
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'catppuccin/nvim',
-    name = 'catppuccin',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'catppuccin-macchiato'
-
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
-    end,
+  {
+    'AlexvZyl/nordic.nvim',
+    lazy = false,
+    priority = 1000,
     config = function()
-      require('catppuccin').setup {
-        integrations = {
-          barbecue = { dim_dirname = true, bold_basename = true, dim_context = false, alt_background = false },
-        },
-      }
+      require('nordic').load()
+      vim.cmd [[highlight CursorLine guibg=NONE ctermbg=NONE]]
+    end,
+  },
 
-      vim.api.nvim_set_hl(0, 'NavicIconsOperator', { default = true, bg = 'none', fg = '#eedaad' })
-      vim.api.nvim_set_hl(0, 'NavicText', { default = true, bg = 'none', fg = '#eedaad' })
-      vim.api.nvim_set_hl(0, 'NavicSeparator', { default = true, bg = 'none', fg = '#eedaad' })
+  {
+    'anuvyklack/windows.nvim',
+    dependencies = {
+      'anuvyklack/middleclass',
+      'anuvyklack/animation.nvim',
+    },
+    config = function()
+      vim.o.winwidth = 15
+      vim.o.winminwidth = 10
+      vim.o.equalalways = false
+      require('windows').setup()
     end,
   },
 
@@ -133,6 +127,53 @@ return {
     },
   },
 
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim' },
+    config = function()
+      local harpoon = require 'harpoon'
+      harpoon.setup {} -- Initialize Harpoon
+
+      -- Basic telescope configuration
+      local conf = require('telescope.config').values
+      local themes = require 'telescope.themes'
+      local function toggle_telescope(harpoon_files)
+        local file_paths = {}
+        for _, item in ipairs(harpoon_files.items) do
+          table.insert(file_paths, item.value)
+        end
+
+        require('telescope.pickers')
+          .new(themes.get_dropdown {}, {
+            prompt_title = 'Harpoon',
+            finder = require('telescope.finders').new_table {
+              results = file_paths,
+            },
+            previewer = conf.file_previewer {},
+            sorter = conf.generic_sorter {},
+          })
+          :find()
+      end
+
+      -- Keymap for toggling Harpoon files in Telescope
+      vim.keymap.set('n', '<leader>h', function()
+        toggle_telescope(harpoon:list())
+      end, { desc = 'Open harpoon window' })
+      vim.keymap.set('n', '<leader>a', function()
+        harpoon:list():add()
+      end)
+      vim.keymap.set('n', '<C-p>', function()
+        harpoon:list():prev()
+      end)
+      vim.keymap.set('n', '<C-n>', function()
+        harpoon:list():next()
+      end)
+      vim.keymap.set('n', '<C-x>', function()
+        harpoon:list():remove()
+      end)
+    end,
+  },
 
   {
     'nvim-lualine/lualine.nvim',
@@ -142,7 +183,7 @@ return {
     },
     opts = {
       options = {
-        theme = 'catppuccin',
+        theme = 'nord',
         component_separators = { left = '│', right = '│' },
         section_separators = { left = '', right = '' },
         globalstatus = true,
@@ -152,7 +193,7 @@ return {
       },
       sections = {
         lualine_a = {
-          { 'fancy_mode', width = 3 },
+          { 'fancy_mode', width = 6 },
         },
         lualine_b = {
           { 'fancy_branch' },
