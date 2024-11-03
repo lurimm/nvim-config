@@ -4,6 +4,35 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'kevinhwang91/nvim-ufo',
+    dependencies = 'kevinhwang91/promise-async',
+    config = function()
+      require('ufo').setup {
+        provider_selector = function()
+          return { 'treesitter', 'indent' }
+        end,
+      }
+      vim.api.nvim_create_user_command('UfoOpenAll', function()
+        require('ufo').openAllFolds()
+      end, { desc = 'Open all folds using nvim-ufo' })
+
+      vim.api.nvim_create_user_command('UfoRefresh', function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        require('ufo').detach(bufnr) -- Detach current buffer to reset folding
+        require('ufo').attach(bufnr) -- Reattach to apply new folds
+      end, { desc = 'Refresh folds using nvim-ufo' })
+
+      vim.keymap.set('n', 'zR', require('ufo').openAllFolds, { desc = 'Open all folds' })
+      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds, { desc = 'Close all folds' })
+      vim.keymap.set('n', 'zK', function()
+        local winid = require('ufo').peekFoldedLinesUnderCursor()
+        if not winid then
+          vim.lsp.buf.hover()
+        end
+      end, { desc = 'Peek Fold' })
+    end,
+  },
+  {
     'utilyre/barbecue.nvim',
     name = 'barbecue',
     version = '*',
@@ -15,8 +44,15 @@ return {
       -- configurations go here
     },
     config = function()
+      local navic = require 'nvim-navic'
+
       require('barbecue').setup {
         theme = 'nord', -- catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+        attach_navic = function(client, buffer)
+          if client.server_capabilities.documentSymbolProvider and not navic.is_available() then
+            navic.attach(client, buffer)
+          end
+        end,
       }
     end,
   },
@@ -38,9 +74,9 @@ return {
       'anuvyklack/animation.nvim',
     },
     config = function()
-      vim.o.winwidth = 15
-      vim.o.winminwidth = 10
-      vim.o.equalalways = false
+      -- vim.o.winwidth = 15
+      -- vim.o.winminwidth = 10
+      -- vim.o.equalalways = false
       require('windows').setup()
     end,
   },
@@ -110,7 +146,7 @@ return {
       { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
     },
     opts = {
-      popup_border_style = 'single',
+      popup_border_style = 'rounded',
       filesystem = {
         window = {
           position = 'float',
@@ -240,7 +276,7 @@ return {
     opts = {
       -- your configuration comes here
       -- for example
-      enabled = true, -- if you want to enable the plugin
+      enabled = false, -- if you want to enable the plugin
       message_template = ' <summary> • <date> • <author> • <<sha>>', -- template for the blame message, check the Message template section for more options
       date_format = '%m-%d-%Y %H:%M:%S', -- template for the date, check Date format section for more options
       virtual_text_column = 1, -- virtual text start column, check Start virtual text at column section for more options
